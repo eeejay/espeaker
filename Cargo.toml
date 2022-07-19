@@ -1,6 +1,7 @@
 [package]
 name = "espeaker"
 version = "0.1.0"
+license = "MIT"
 authors = ["Eitan Isaacson <eitan@monotonous.org>"]
 description = "eSpeak NG playback library"
 keywords = ["espeak-ng", "audio", "tts", "speech", "rodio"]
