@@ -3,7 +3,7 @@ name = "espeaker"
 version = "0.1.0"
 authors = ["Eitan Isaacson <eitan@monotonous.org>"]
 description = "eSpeak NG playback library"
-keywords = ["espeak-ng", "audio", "tts", "speech", "playback", "rodio"]
+keywords = ["espeak-ng", "audio", "tts", "speech", "rodio"]
 repository = "https://github.com/eeejay/espeaker"
 edition = "2021"
 
