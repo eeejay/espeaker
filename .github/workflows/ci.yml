@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  RUSTFLAGS: "-C debuginfo=0 -D warnings"
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.toolchain == 'nightly' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        toolchain: [stable, beta, nightly]
+        include:
+          - os: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install linux deps
+        run: |
+          sudo apt update
+          sudo apt install -y --no-install-recommends libasound2-dev pkg-config libespeak-ng-dev
+        if: contains(matrix.os, 'ubuntu')
+
+      - name: install ${{ matrix.toolchain }} toolchain
+        id: install_toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          profile: minimal
+          override: true
+
+      - run: |
+          rustup component add rustfmt
+          cargo fmt --all -- --check
+        if: matrix.toolchain == 'stable' && matrix.os == 'ubuntu-latest'
+
+      - run: cargo test --all-targets
+
+  cargo-publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      CRATESIO_TOKEN: ${{ secrets.CRATESIO_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Update apt
+        run: sudo apt update
+      - name: Install alsa
+        run: sudo apt install -y --no-install-recommends libasound2-dev pkg-config libespeak-ng-dev
+      - name: Run cargo publish for espeaker
+        continue-on-error: true
+        run: |
+          ESPEAKER_TMP=$(mktemp /tmp/espeakerXXX.txt) || echo "::error::mktemp error"
+          echo "ESPEAKER_TMP=$ESPEAKER_TMP" >> $GITHUB_ENV
+          cargo publish --token $CRATESIO_TOKEN 2> $ESPEAKER_TMP
+      - name: Check if espeaker is already published
+        run: |
+          empty=0
+          ESPEAKER_TMP="${{ env.ESPEAKER_TMP }}"
+          grep -q '[^[:space:]]' < $ESPEAKER_TMP || empty=1
+          [ $empty -eq 0 ] && cat $ESPEAKER_TMP
+          [ $empty -eq 1 ] || grep -q "is already uploaded" < $ESPEAKER_TMP
