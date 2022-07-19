@@ -19,6 +19,46 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+//! eSpeak NG playback library
+//!
+//! The main use of this library is to create and configure a [`Speaker`]
+//! which in turn creates a [`SpeakerSource`] that implements a [`rodio::Source`].
+//!
+//! For example, here is how you would synthesize a simple phrase:
+//! ```no_run
+//! let speaker = espeaker::Speaker::new();
+//! let source = speaker.speak("Hello, world!");
+//! let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+//! let sink = Sink::try_new(&stream_handle).unwrap();
+//! sink.append(source);
+//! sink.sleep_until_end();
+//! ```
+//!
+//! You can tweak the speaker's parameters via [`Speaker::params`].
+//! Each change will only affect the given speaker. This is unlike
+//! eSpeak NG's API where a parameter change is global:
+//! ```no_run
+//! let mut speaker = espeaker::Speaker::new();
+//! speaker.params.pitch = Some(400);
+//! speaker.params.rate = Some(80);
+//! ```
+//!
+//! This library also supports callbacks that can be used when certain
+//! speech landmarks like words or sentences are spoken.
+//! Use the [`SpeakerSource::with_callback`] method to create a new source
+//! that dispatches the callback:
+//! ```no_run
+//! let mut speaker = espeaker::Speaker::new();
+//! speaker.params.rate = Some(280);
+//! let source = speaker.speak("Hello world, goodbye!");
+//! let source = source.with_callback(move |evt| match evt {
+//!     espeaker::Event::Word(start, _len) => {
+//!         println!("'Word at {}'", start);
+//!     }
+//!     espeaker::Event::Sentence(_) => (),
+//! });
+//! ```
+
 use espeakng_sys::*;
 use lazy_static::lazy_static;
 use rodio::Source;
