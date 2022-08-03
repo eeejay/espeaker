@@ -26,6 +26,8 @@
 //!
 //! For example, here is how you would synthesize a simple phrase:
 //! ```no_run
+//! use rodio::{OutputStream, Sink};
+//!
 //! let speaker = espeaker::Speaker::new();
 //! let source = speaker.speak("Hello, world!");
 //! let (_stream, stream_handle) = OutputStream::try_default().unwrap();
