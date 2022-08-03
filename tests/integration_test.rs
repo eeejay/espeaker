@@ -97,6 +97,7 @@ mod tests {
             (22675usize, Event::Sentence(13)),
             (22675usize, Event::Word(13, 7)),
             (31355usize, Event::Word(21, 5)),
+            (40786usize, Event::End),
         ];
 
         assert_eq!(events.len(), expected.len());

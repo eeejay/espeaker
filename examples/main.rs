@@ -13,6 +13,9 @@ fn main() {
             println!("'{}'", &s[..][start..(start + len)]);
         }
         espeaker::Event::Sentence(_) => (),
+        espeaker::Event::End => {
+            println!("END!");
+        }
     });
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     let sink = Sink::try_new(&stream_handle).unwrap();
@@ -31,6 +34,9 @@ fn main() {
             println!("'{}'", &s[..][start..(start + len)]);
         }
         espeaker::Event::Sentence(_) => (),
+        espeaker::Event::End => {
+            println!("END!");
+        }
     });
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     let sink = Sink::try_new(&stream_handle).unwrap();
@@ -50,6 +56,9 @@ fn main() {
             println!("{} {}", start, len);
         }
         espeaker::Event::Sentence(_) => (),
+        espeaker::Event::End => {
+            println!("END!");
+        }
     });
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     let sink = Sink::try_new(&stream_handle).unwrap();

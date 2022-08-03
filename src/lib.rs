@@ -58,6 +58,9 @@
 //!         println!("'Word at {}'", start);
 //!     }
 //!     espeaker::Event::Sentence(_) => (),
+//!     espeaker::Event::End => {
+//!         println!("'End!");
+//!     }
 //! });
 //! ```
 
@@ -185,6 +188,7 @@ pub fn list_voices() -> Vec<Voice> {
 pub enum Event {
     Word(usize, usize),
     Sentence(usize),
+    End,
 }
 
 #[derive(Clone)]
@@ -332,7 +336,7 @@ impl SpeakerSource {
                 while i >= self.data.len() {
                     match self.rx.recv() {
                         Err(_) => {
-                            return (None, None);
+                            return (None, Some(vec![Event::End]));
                         }
                         Ok((mut wav_vec, mut events_vec)) => {
                             // for event in &events_vec {
