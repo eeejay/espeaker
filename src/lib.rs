@@ -153,7 +153,10 @@ impl Voice {
                 let lang_cstr = unsafe { CStr::from_ptr(langs_ptr) };
                 let name = String::from(lang_cstr.to_str().unwrap());
                 let name_len = name.bytes().count();
-                languages.push(Language { priority: priority.try_into().unwrap(), name });
+                languages.push(Language {
+                    priority: priority.try_into().unwrap(),
+                    name,
+                });
                 langs_ptr = langs_ptr.wrapping_add(name_len + 1);
             }
         }
