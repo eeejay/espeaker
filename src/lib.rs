@@ -189,6 +189,7 @@ pub fn list_voices() -> Vec<Voice> {
 
 #[derive(Debug, PartialEq)]
 pub enum Event {
+    Start,
     Word(usize, usize),
     Sentence(usize),
     End,
@@ -391,6 +392,10 @@ impl SpeakerSource {
         while unsafe { (*events_copy).type_ != espeak_EVENT_TYPE_espeakEVENT_LIST_TERMINATED } {
             // let at_sample = audio_position * self.sample_rate * 1000;
             let evt = match unsafe { (*events_copy).type_ } {
+                espeak_EVENT_TYPE_espeakEVENT_SAMPLERATE => {
+                    // This is the start of the utterance
+                    Some(Event::Start)
+                }
                 espeak_EVENT_TYPE_espeakEVENT_WORD => {
                     let text_position: usize =
                         unsafe { (*events_copy).text_position.try_into().unwrap() };

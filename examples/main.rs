@@ -9,6 +9,9 @@ fn main() {
     speaker.params.pitch = Some(400);
     let source = speaker.speak(&s);
     let source = source.with_callback(move |evt| match evt {
+        espeaker::Event::Start => {
+            println!("START!");
+        }
         espeaker::Event::Word(start, len) => {
             println!("'{}'", &s[..][start..(start + len)]);
         }
@@ -30,6 +33,9 @@ fn main() {
     speaker.params.rate = Some(280);
     let source = speaker.speak(&s);
     let source = source.with_callback(move |evt| match evt {
+        espeaker::Event::Start => {
+            println!("START!");
+        }
         espeaker::Event::Word(start, len) => {
             println!("'{}'", &s[..][start..(start + len)]);
         }
@@ -52,6 +58,9 @@ fn main() {
     speaker.set_voice(&voice);
     let source = speaker.speak(&s);
     let source = source.with_callback(move |evt| match evt {
+        espeaker::Event::Start => {
+            println!("START!");
+        }
         espeaker::Event::Word(start, len) => {
             println!("{} {}", start, len);
         }
