@@ -333,6 +333,10 @@ impl SpeakerSource {
         }
     }
 
+    pub fn iter_audio_and_events(self) -> IterAudioAndEvents {
+        IterAudioAndEvents { inner: self }
+    }
+
     fn next_sample_and_events(&mut self) -> (Option<i16>, Option<Vec<Event>>) {
         match self.iter_index {
             None => (None, None),
@@ -343,10 +347,6 @@ impl SpeakerSource {
                             return (None, Some(vec![Event::End]));
                         }
                         Ok((mut wav_vec, mut events_vec)) => {
-                            // for event in &events_vec {
-                            //   println!("current position: {} event position: {}", i * 1000 / self.sample_rate as usize, event.audio_position);
-                            //   println!("{} {} {:?}", i, event.audio_position * self.sample_rate / 1000, event.data)
-                            // }
                             self.data.append(&mut wav_vec);
                             self.events.append(&mut events_vec);
                         }
@@ -510,6 +510,28 @@ where
         }
 
         return sample;
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
+
+pub struct IterAudioAndEvents {
+    inner: SpeakerSource,
+}
+
+impl Iterator for IterAudioAndEvents
+{
+    type Item = (i16, Option<Vec<Event>>);
+
+    fn next(&mut self) -> Option<(i16, Option<Vec<Event>>)> {
+        let (sample, events) = self.inner.next_sample_and_events();
+
+        match sample {
+            None => None,
+            Some(sample) => Some((sample, events))
+        }
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
