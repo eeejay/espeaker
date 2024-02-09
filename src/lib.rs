@@ -204,6 +204,7 @@ pub struct SpeakerParams {
     pub punctuation: Option<i32>,
     pub capitals: Option<i32>,
     pub word_gap: Option<i32>,
+    pub is_ssml: bool,
 }
 
 impl SpeakerParams {
@@ -216,6 +217,7 @@ impl SpeakerParams {
             punctuation: None,
             capitals: None,
             word_gap: None,
+            is_ssml: false,
         }
     }
 
@@ -283,7 +285,12 @@ impl SpeakerSource {
         let text_cstr = CString::new(text).expect("Failed to convert &str to CString");
         thread::spawn(move || {
             let _lock = ESPEAK_INIT.plock();
-            params.apply_params();
+            let flags = if params.is_ssml {
+                espeakSSML | espeakCHARS_AUTO
+           } else {
+               espeakCHARS_AUTO
+           };
+           params.apply_params();
             let tx_ptr: *mut c_void = &mut tx as *mut _ as *mut c_void;
 
             unsafe {
@@ -297,7 +304,6 @@ impl SpeakerSource {
             let position = 0u32;
             let position_type: espeak_POSITION_TYPE = 0;
             let end_position = 0u32;
-            let flags = espeakCHARS_AUTO;
 
             let identifier = std::ptr::null_mut();
             unsafe {
