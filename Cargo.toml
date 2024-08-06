@@ -10,6 +10,6 @@ edition = "2021"
 
 [dependencies]
 espeakng-sys = "= 0.2.0"
-rodio = "0.17.0"
+rodio = "0.19.0"
 lazy_static = "1.4.0"
 readonly = "0.2"
