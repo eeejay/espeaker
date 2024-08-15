@@ -58,6 +58,9 @@
 //!         println!("'Word at {}'", start);
 //!     }
 //!     espeaker::Event::Sentence(_) => (),
+//!     espeaker::Event::Start => {
+//!         println!("'Start!")
+//!     }
 //!     espeaker::Event::End => {
 //!         println!("'End!");
 //!     }
@@ -287,10 +290,10 @@ impl SpeakerSource {
             let _lock = ESPEAK_INIT.plock();
             let flags = if params.is_ssml {
                 espeakSSML | espeakCHARS_AUTO
-           } else {
-               espeakCHARS_AUTO
-           };
-           params.apply_params();
+            } else {
+                espeakCHARS_AUTO
+            };
+            params.apply_params();
             let tx_ptr: *mut c_void = &mut tx as *mut _ as *mut c_void;
 
             unsafe {
@@ -426,11 +429,14 @@ impl SpeakerSource {
         let tx_ptr = unsafe { (*events).user_data };
         let tx: &mut Sender<(Vec<i16>, Vec<(u32, Event)>)> =
             unsafe { &mut *(tx_ptr as *mut Sender<(Vec<i16>, Vec<(u32, Event)>)>) };
-        let wav_slice = unsafe { std::slice::from_raw_parts(wav, sample_count as usize) };
-        let wav_vec = wav_slice
-            .into_iter()
-            .map(|f| f.clone() as i16)
-            .collect::<Vec<i16>>();
+        let mut wav_vec: Vec<i16> = Vec::new();
+        if !wav.is_null() {
+            let wav_slice = unsafe { std::slice::from_raw_parts(wav, sample_count as usize) };
+            wav_vec = wav_slice
+                .into_iter()
+                .map(|f| f.clone() as i16)
+                .collect::<Vec<i16>>();
+        }
         match tx.send((wav_vec, events_vec)) {
             Err(_) => 1,
             Ok(_) => 0,
@@ -527,8 +533,7 @@ pub struct IterAudioAndEvents {
     inner: SpeakerSource,
 }
 
-impl Iterator for IterAudioAndEvents
-{
+impl Iterator for IterAudioAndEvents {
     type Item = (i16, Option<Vec<Event>>);
 
     fn next(&mut self) -> Option<(i16, Option<Vec<Event>>)> {
@@ -536,7 +541,7 @@ impl Iterator for IterAudioAndEvents
 
         match sample {
             None => None,
-            Some(sample) => Some((sample, events))
+            Some(sample) => Some((sample, events)),
         }
     }
 
