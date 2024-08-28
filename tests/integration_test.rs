@@ -30,13 +30,11 @@ mod tests {
         assert_within!(count, 21748usize, 500);
 
         // Higher speech rate generates less samples
-        // speaker.add_param(SpeakerParam::Rate(400));
         speaker.params.rate = Some(400);
         let source = speaker.speak("Hello, world");
         let count = source.count();
         assert_within!(count, 6902usize, 500);
     }
-
     #[test]
     fn synth_twice_without_crashing() {
         let speaker = Speaker::new();
@@ -47,7 +45,6 @@ mod tests {
         let count = source.count();
         assert_within!(count, 11888usize, 500);
     }
-
     #[test]
     fn has_samplerate() {
         let speaker = Speaker::new();
@@ -91,6 +88,7 @@ mod tests {
             current_sample.set(current_sample.get() + 1);
         }
         let expected = [
+            (0usize, Event::Start),
             (0usize, Event::Sentence(0)),
             (0usize, Event::Word(0, 5)),
             (6769usize, Event::Word(6, 5)),
