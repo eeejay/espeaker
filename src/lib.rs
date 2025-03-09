@@ -66,6 +66,7 @@
 //!     }
 //! });
 //! ```
+pub use rodio;
 
 use espeakng_sys::*;
 use lazy_static::lazy_static;
