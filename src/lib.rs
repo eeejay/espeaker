@@ -69,21 +69,22 @@
 pub use rodio;
 
 use espeakng_sys::*;
-use lazy_static::lazy_static;
 use rodio::Source;
 use std::ffi::{c_void, CStr, CString};
 use std::os::raw::{c_char, c_int, c_short};
 use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::OnceLock;
 use std::sync::{Mutex, MutexGuard};
 use std::thread;
 use std::time::Duration;
 
-lazy_static! {
-    static ref ESPEAK_INIT: Mutex<u32> = Mutex::new(0);
+fn espeak_init() -> &'static Mutex<u32> {
+    static ESPEAK_INIT: OnceLock<Mutex<u32>> = OnceLock::new();
+    ESPEAK_INIT.get_or_init(|| Mutex::new(0))
 }
 
 fn init() -> u32 {
-    let mut lock = ESPEAK_INIT.plock();
+    let mut lock = espeak_init().plock();
     if *lock == 0 {
         *lock = unsafe {
             espeak_Initialize(
@@ -178,7 +179,7 @@ impl Voice {
 pub fn list_voices() -> Vec<Voice> {
     init();
     {
-        let _lock = ESPEAK_INIT.plock();
+        let _lock = espeak_init().plock();
         let mut result = Vec::<Voice>::new();
         let mut voice_arr = unsafe { espeak_ListVoices(std::ptr::null_mut()) };
 
@@ -288,7 +289,7 @@ impl SpeakerSource {
         .expect("Failed to convert &str to CString");
         let text_cstr = CString::new(text).expect("Failed to convert &str to CString");
         thread::spawn(move || {
-            let _lock = ESPEAK_INIT.plock();
+            let _lock = espeak_init().plock();
             let flags = if params.is_ssml {
                 espeakSSML | espeakCHARS_AUTO
             } else {
